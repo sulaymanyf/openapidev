@@ -1,0 +1,1852 @@
+swagger: '2.0'
+info:
+  version: v1
+  title: KooMap
+  description: Satellite Interpretation Service
+schemes:
+  - https
+host: koomap.huaweicloud.com
+basePath: /
+tags:
+  - name: SatelliteInterpretationService
+paths:
+  /v1/kmp-satellite/upload:
+    post:
+      x-request-examples-url-1: https://{endpoint}/v1/satellite-interpretation/upload
+      x-request-examples-description-1: This request uploads tiff file to OBS and save file information/metadata to the database.
+      x-request-examples-body-formdata:
+        file: validgeo.tiff
+        file_url: https://kmp-sat-huawei.com:443/Thumbnail%2Fwaujayspnk-1420800.jpg
+      tags:
+        - Upload-File
+      description: This api is used for uploading tiff files to the system. User can upload only TIFF files.Files that are not in Geotiff format are not accepted.
+      operationId: UploadTiff
+      summary: Upload Tiff File
+      consumes:
+        - multipart/form-data
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      produces:
+        - application/json
+      parameters:
+        - name: X-Auth-Token
+          in: header
+          required: true
+          type: string
+          description: A valid token for the IAM tenant account.
+        - name: file
+          in: formData
+          type: file
+          required: false
+          description: The body of the request to upload the TIFF file.
+        - in: formData
+          name: file_url
+          type: string
+          required: false
+          description: The body of the request to upload the TIFF file with url.
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            $ref: '#/definitions/UploadFileResult'
+          examples:
+            application/json:
+              file_id: 5916b0e7c5934fccb3036289ae694965
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+      x-order: 2
+  /v1/kmp-satellite/display:
+    get:
+      x-request-examples-description-1: This example request is for getting the geojson results of the model task for specific coordinates.
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/display
+      tags:
+        - Display
+      summary: Provide modeling data for the selected area
+      description: Provide modeling data for the selected area
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      operationId: DisplayModellingData
+      produces:
+        - application/json
+      parameters:
+        - name: X-Auth-Token
+          in: header
+          required: true
+          type: string
+          description: IAM token information, which is used for tenant authentication. The value of this parameter can be obtained from the token request API of IAM.
+        - name: task_ids
+          in: query
+          required: true
+          type: string
+          description: Task ID divided by comma
+        - name: x_min
+          in: query
+          required: true
+          type: number
+          format: double
+          description: Display min x
+        - name: y_min
+          in: query
+          required: true
+          type: number
+          format: double
+          description:  Display max x
+        - name: x_max
+          in: query
+          required: true
+          type: number
+          format: double
+          description: Display min y
+        - name: y_max
+          in: query
+          required: true
+          type: number
+          format: double
+          description: Display max y
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            $ref: '#/definitions/DisplayResponseDto'
+          headers:
+            X-request-id:
+              type: string
+          examples:
+            application/json:
+              tasks:
+                - task_id: string
+                  model: string
+                  centroid_x: 2.0
+                  centroid_y: 2.0
+                  features:
+                    type: string
+                    crs:
+                      type: "string"
+                      properties:
+                        name: "string"
+                    features:
+                      - type: "string"
+                        id: "string"
+                        geometry:
+                          type: "string"
+                          coordinates:
+                            - [
+                              [
+                                [ 1.0,2.0 ], [ 3.0,4.0 ]
+                              ]
+                            ]
+                        properties:
+                          fid: 0
+
+        '400':
+          description: Invalid request.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: An internal service error occurs.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+      x-order: 3
+  /v1/kmp-satellite/display/image:
+    get:
+      x-request-examples-description-1: This request is used to display partial image by obs_object_key. obs_object_key query condition is required.
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/display/image
+      tags:
+        - Display
+      summary: Display partial Image
+      description: Display partial Image
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      operationId: displayPartialImage
+      produces:
+        - image/png
+      parameters:
+        - name: obs_object_key
+          in: query
+          required: true
+          type: string
+          description: Obs object key parameter of the tif file
+        - name: WIDTH
+          in: query
+          required: false
+          type: integer
+          format: int32
+          description: Uppercase WIDTH parameter of image
+        - name: width
+          in: query
+          required: false
+          type: integer
+          format: int32
+          description: Lowercase width parameter of image
+        - name: HEIGHT
+          in: query
+          required: false
+          type: integer
+          format: int32
+          description: Uppercase HEIGHT parameter of image
+        - name: height
+          in: query
+          required: false
+          type: integer
+          format: int32
+          description: Lowercase height parameter of image
+        - name: BBOX
+          in: query
+          required: false
+          type: string
+          description: Uppercase BBOX parameter of image, Parameter that limits the area on the map
+        - name: bbox
+          in: query
+          required: false
+          type: string
+          description: Lowercase bbox parameter of image, Parameter that limits the area on the map
+        - name: LAYERS
+          in: query
+          required: false
+          type: string
+          description: Uppercase LAYERS parameter of image,Used to provide layer information to render the tif file.
+        - name: layers
+          in: query
+          required: false
+          type: string
+          description: Lowercase LAYERS parameter of image,Used to provide layer information to render the tif file.
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            type: file
+          headers:
+            X-request-id:
+              type: string
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+  /v1/kmp-satellite/display/{file-id}/image/info:
+    get:
+      x-request-examples-description-1: The file-id parameter of the user's uploaded tif file.The file-id paremeter is required.
+      x-request-examples-url-1:  https://{endpoint}/v1/kmp-satellite/display/714eb5d118df458da32fd44917c42082/image/info
+      tags:
+        - Display
+      summary: Get image info
+      description: Get image info
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      operationId: getDisplayImageInfo
+      produces:
+        - application/json
+      parameters:
+        - name: file-id
+          in: path
+          required: true
+          type: string
+          description: The file-id parameter of the user's uploaded tif file.
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            $ref: '#/definitions/DisplayImageInfoDto'
+          examples:
+            application/json:
+                center:
+                  x: 2.0
+                  y: 2.0
+                extent:
+                  min_x: 2.0
+                  min_y: 2.0
+                  max_x: 2.0
+                  max_y: 2.0
+        '400':
+          description: Invalid request.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: An internal service error occurs.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+  /v1/kmp-satellite/user-files/{file_id}/tasks:
+    get:
+      x-request-examples-description-1: This request is used to get tasks by uploaded file id
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/user-files/ec509718eedb46a78e0be3937c552d4d/tasks
+      tags:
+        - User-Files
+      summary: Get tasks by uploaded file id
+      description: This request is used to get tasks by uploaded file id
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      operationId: GetUserFileTasks
+      parameters:
+        - name: X-Auth-Token
+          in: header
+          required: true
+          description: IAM token information, which is used for tenant authentication. The value of this parameter can be obtained from the token request API of IAM.
+          type: string
+        - name: file_id
+          in: path
+          required: true
+          type: string
+          description: Uploaded file id
+      responses:
+        '200':
+          description: The request is successful
+          schema:
+            $ref: '#/definitions/TaskRespDto'
+          examples:
+            application/json:
+              full_frames:
+              - id: "cb9cf53b96ba423a8ecb7fb5a292f5d4"
+                status: 5
+                model: "tree"
+                type: "model"
+                parameters: null
+                created_at: "2023-12-01 13:42:34"
+                updated_at: "2023-12-01 13:42:38"
+                uploaded_id: "ec509718eedb46a78e0be3937c552d4d"
+                centroid_x: null
+                centroid_y: null
+                frame_name: null
+                coordinates: null
+                is_partial: false
+              selected_frames:
+                "Test":
+                  - id: "7161e3b4d1cf49c98c01c5d9bf3c8333"
+                    status: 5
+                    model: "tree"
+                    type: "model"
+                    parameters: null
+                    created_at: "2023-12-02 02:28:30"
+                    updated_at: "2023-12-02 02:28:53"
+                    uploaded_id: "ec509718eedb46a78e0be3937c552d4d"
+                    centroid_x: null
+                    centroid_y: null
+                    frame_name: "Test"
+                    coordinates:
+                      x_min: 1.2695185603363976E7
+                      y_min: 2577574.8956643557
+                      x_max: 1.2695979843405189E7
+                      y_max: 2578301.047433065
+                    is_partial: true
+          headers:
+            X-request-id:
+              type: string
+              description: Request ID, which is used by O&M personnel to locate request logs.
+              minLength: 32
+              maxLength: 32
+        '400':
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              type: string
+              description: Request ID, which is used by O&M personnel to locate request logs.
+              minLength: 32
+              maxLength: 32
+        '500':
+          description: An internal service error occurs
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              description: Request ID, which is used by O&M personnel to locate request logs
+              type: string
+              minLength: 32
+              maxLength: 32
+  /v1/kmp-satellite/generate-thumbnail:
+    post:
+      tags:
+        - Generate-Thumbnail
+      summary: Thumbnail Generator
+      description: Generate thumbnail with uploaded tiff file id
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/generate-thumbnail
+      x-request-examples-description-1: This request generate thumbnail with uploaded tiff file id.
+      x-request-examples-params:
+        file_id: 3ac2ce114061439cb81d87d792f877aa
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      operationId: GenerateThumbnail
+      parameters:
+        - name: file_id
+          in: query
+          required: true
+          type: string
+          description: Uploaded file id
+        - name: X-Auth-Token
+          in: header
+          required: true
+          type: string
+          description: IAM token information, which is used for tenant authentication. The value of this parameter can be obtained from the token request API of IAM.
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            $ref: "#/definitions/ThumbnailGenerateRespDto"
+          examples:
+            application/json:
+              obs_url: https://kmp-sat-in527601.jpg
+              message: Thumbnail generate request received.
+        '400':
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: An internal service error occurs.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+  /v1/kmp-satellite/download:
+    get:
+      x-request-examples-description-1: The request returns a temporal downloadable url for given task id
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/download
+      tags:
+        - Download
+      operationId: DownloadAIModelResult
+      summary: Get downloadable urls for AI model results
+      description: This interface is used to generate a temporal downloadable urls for AI model results.
+      parameters:
+        - name: task_id
+          in: query
+          required: true
+          type: string
+          description: Task id
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            items:
+              $ref: "#/definitions/DownloadResp"
+            type: array
+          examples:
+            application/json:
+              - id: i65nt1r4ni5b5ghxdijh
+                task_id: v58cvs4jbmo5phaag74a
+                obs_id: pc03aimv8nnqxtc24hfr
+                type: zip
+                created_at: 2017-07-21T17:32:28Z
+                updated_at: 2017-07-21T17:32:28Z
+                obs_file_url: https://...
+                obs_object_key: generated/mfa1dashhod-1051742099310010.zip
+                size: 72176
+        '400':
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              type: string
+              description: Request ID, which is used by O&M personnel to locate request logs
+              minLength: 32
+              maxLength: 32
+        '500':
+          description: An internal service error occurs
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              description: Request ID, which is used by O&M personnel to locate request logs
+              type: string
+              minLength: 32
+              maxLength: 32
+  /v1/kmp-satellite/generate:
+    post:
+      x-request-examples-description-1: The request generate a task from AI model
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/generate
+      x-request-examples-text-1:
+       file_id: "03d2c695bd18431ca86c833c1372332b"
+       models:  ["tree"]
+       type: "model"
+       parameters: ["SR"]
+      x-request-examples-1:
+        file_id: "03d2c695bd18431ca86c833c1372332b"
+        models:  ["tree"]
+        type: "model"
+        parameters: ["SR"]
+      tags:
+        - Task-Operations
+      summary: Generate from AI model
+      description: This endpoint is used to start modelling for the given uploaded file according to the model information and parameters.
+      operationId: GenerateFromAiModel
+      parameters:
+        - name: X-Auth-Token
+          in: header
+          required: true
+          description: IAM token information, which is used for tenant authentication. The value of this parameter can be obtained from the token request API of IAM.
+          type: string
+        - name: GenerateRequestDto
+          in: body
+          required: true
+          description: Request body for creating a task from AI model
+          schema:
+            $ref: "#/definitions/GenerateRequestDto"
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/TaskStatusDto"
+          examples:
+            application/json:
+              - task_id: "6ddf0c6f0bf64bc29bab9b075869be7d"
+                status: TASK_CREATED
+                model: "tree"
+                type: "model"
+                parameters: ["SR"]
+                is_partial: false
+                created_at: "2023-12-13T13:18:10.701Z"
+        '400':
+          description: Invalid request.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              type: string
+              description: Request ID, which is used by O&M personnel to locate request logs.
+              minLength: 32
+              maxLength: 32
+        '500':
+          description: An internal service error occurs.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              description: Request ID, which is used by O&M personnel to locate request logs.
+              type: string
+              minLength: 32
+              maxLength: 32
+  /v1/kmp-satellite/generate-for-frame:
+    post:
+      x-request-examples-description-1: This request generates partial frame from AI model
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/generate-for-frame
+      x-request-examples-text-1:
+        file_id: "03d2c695bd18431ca86c833c1372332b"
+        model: "tree"
+        parameters: ["SR"]
+        coordinates:
+          x_min: 12695148.678640252
+          y_min: 2577589.2276071595
+          x_max: 12696476.798303531
+          y_max: 2578184.376868093
+        frame_name: "sssssssssss"
+      x-request-examples-1:
+        file_id: "03d2c695bd18431ca86c833c1372332b"
+        model: "tree"
+        parameters: ["SR"]
+        coordinates:
+          x_min: 12695148.678640252
+          y_min: 2577589.2276071595
+          x_max: 12696476.798303531
+          y_max: 2578184.376868093
+        frame_name: "sssssssssss"
+      tags:
+        - Task-Operations
+      summary: Generate partial frame from AI model
+      operationId: GeneratePartialFrameFromAiModel
+      description: This interface is used to generate partial frame from AI model.
+      parameters:
+        - name: X-Auth-Token
+          in: header
+          required: true
+          description: IAM token information, which is used for tenant authentication. The value of this parameter can be obtained from the token request API of IAM.
+          type: string
+        - name: GenerateRequestDto
+          in: body
+          required: true
+          description: Request body for generate partial frame from ai model
+          schema:
+            $ref: "#/definitions/GenerateForFrameRequestDto"
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: The request is successful
+          schema:
+            $ref: "#/definitions/TaskStatusDto"
+          examples:
+            application/json:
+              task_id: "94ef0b6cd2fa46869146684cdf0bfb6e"
+              status: "TASK_CREATED"
+              model: "tree"
+              type: "SR"
+              parameters: ["SR"]
+              is_partial: false
+              created_at: "2023-12-13T13:18:10.701Z"
+        '400':
+          description: Invalid request.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              type: string
+              description: Request ID, which is used by O&M personnel to locate request logs.
+              minLength: 32
+              maxLength: 32
+        '500':
+          description: An internal service error occurs.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              description: Request ID, which is used by O&M personnel to locate request logs.
+              type: string
+              minLength: 32
+              maxLength: 32
+  /v1/kmp-satellite/user-files/:
+    get:
+      x-request-examples-description-1: The request returns temporal downloadable urls for user's uploaded files and some metadata information about this files
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/user-files/
+      tags:
+        - User-Files
+      operationId: GetUserFiles
+      summary: Get User Files
+      description: This interface is used to get temporal downloadable urls for user files and some informations about these files like thumbnail url,corner coordinates and center coordinates
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      produces:
+        - application/json
+      parameters:
+        - name: X-Auth-Token
+          in: header
+          required: true
+          type: string
+          description: Token of the IAM tenant account
+        - name: offset
+          in: query
+          required: false
+          minimum: 0
+          type: integer
+          format: int32
+          default: 0
+          description: Current page
+        - name: limit
+          in: query
+          required: false
+          maximum: 100
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+          description: Data count of per page
+      responses:
+        '200':
+          description: The request is successful
+          schema:
+            items:
+              $ref: "#/definitions/PagedResultUserFileDto"
+            type: array
+          examples:
+            application/json:
+              data:
+                - id: efzrkygbkzuov9sux2k3
+                  file_name: test_file
+                  obs_id: gvh4dqu1q0024kpkmmyb
+                  obs_object_key: generated/mfa1dashhod-1051742099310010.zip
+                  obs_object_url: https://
+                  created_at: 2017-07-21T17:32:28Z
+                  updated_at: 2017-07-21T17:32:28Z
+                  thumbnail_url: https://
+                  file_centroid_x: 5.0
+                  file_centroid_y: 6.0
+                  corners:
+                    x_min: 2.0
+                    y_min: 2.0
+                    x_max: 5.0
+                    y_max: 5.0
+              page:
+                offset: 1
+                limit: 10
+                total: 5
+        '400':
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              type: string
+              description: Request ID, which is used by O&M personnel to locate request logs
+              minLength: 32
+              maxLength: 32
+
+        '500':
+          description: An internal service error occurs
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              description: Request ID, which is used by O&M personnel to locate request logs
+              type: string
+              minLength: 32
+              maxLength: 32
+  /v1/kmp-satellite/user-files/{file_id}/download:
+    get:
+      x-request-examples-description-1: The request returns a temporal downloadable url for the given file id
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/user-files/44eb5d869258451595f15dd26ee03xxx/download
+      tags:
+        - User-Files
+      summary: Get user file download url
+      description: This interface is used to return a temporal downloadable url and some file metadata for the given file id that belongs user.
+      operationId: DownloadUserFile
+      produces:
+        - application/json
+      parameters:
+        - name: file_id
+          in: path
+          required: true
+          type: "string"
+          description: File Id that will be generated a downloadable url
+      responses:
+        '200':
+          description: The request is successful
+          schema:
+            $ref: "#/definitions/DownloadUserFileDto"
+          examples:
+            application/json:
+              id: 6trh4d9s12cuebexocob
+              file_name: test_file.tif
+              file_url: https://...
+              obs_file_url: https://...
+              obs_object_key: generated/mfa1dashhod-1051742099310010.zip
+              obs_bucket_name: kmp-sat-interpret-cn-north-7
+              created_at: 2017-07-21T17:32:28Z
+        '400':
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: An internal service error occurs
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+  /v1/kmp-satellite/user-files/{file_id}:
+    delete:
+      x-request-examples-description-1: The request deletes a user file for given file id
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/user-files/44eb5d869258451595f15dd26ee03xxx
+      tags:
+        - User-Files
+      summary: Delete user file
+      description: This interface is used to delete a user file from given file id
+      operationId: DeleteUserFile
+      produces:
+        - application/json
+      parameters:
+        - name: file_id
+          in: path
+          required: true
+          type: string
+          description: The ID of the file to be deleted
+      responses:
+        '200':
+          description: The request is successful
+        '400':
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: An internal service error occurs
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+    get:
+      x-request-examples-description-1: The request returns a temporal downloadable url and some metadata about this file like corner coordinates and thumbnail url for user file from given file id
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/user-files/44eb5d869258451595f15dd26ee03xxx
+      tags:
+        - User-Files
+      summary: Get user file details
+      operationId: getUserFile
+      description: This interface is used to get a temporal downloadable url and some metadata about this file such as thumbnail url, file corner coordinates and file x and y centroid coordinates from given file id for user.
+      parameters:
+        - name: file_id
+          in: path
+          required: true
+          type: string
+          description: File id parameter
+      responses:
+        '200':
+          description: The request is successful
+          schema:
+            $ref: "#/definitions/UserFileDto"
+          examples:
+            application/json:
+              id: efzrkygbkzuov9sux2k3
+              file_name: test_file
+              obs_id: gvh4dqu1q0024kpkmmyb
+              obs_object_key: generated/mfa1dashhod-1051742099310010.zip
+              obs_object_url: https://
+              created_at: 2017-07-21T17:32:28Z
+              updated_at: 2017-07-21T17:32:28Z
+              thumbnail_url: https://
+              file_centroid_x: 5.0
+              file_centroid_y: 6.0
+              corners:
+                x_min: 2.0
+                y_min: 2.0
+                x_max: 5.0
+                y_max: 5.0
+        '400':
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: An internal service error occurs
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+  /v1/kmp-satellite/submit-error:
+    post:
+      x-request-examples-description-1: This request updates task status on failure
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/submit-error
+      x-request-examples-text-1:
+        task_id: "94ef0b6cd2fa46869146684cdf0bfb6e"
+        status: 3
+        message: "Task fail"
+      x-request-examples-1:
+        task_id: "94ef0b6cd2fa46869146684cdf0bfb6e"
+        status: 3
+        message: "Task fail"
+      tags:
+        - AIService
+      summary: Report failed tasks
+      description: This interface is used to update task status on failure.
+      operationId: SubmitError
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: internal
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: submit_error_request
+          in: body
+          schema:
+            $ref: '#/definitions/SubmitErrorReq'
+          required: true
+          description: Task information.
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            type: string
+          examples:
+            application/json: Success
+        '400':
+          description: Invalid request.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: An internal service error occurs.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+      x-order: 1
+  /v1/kmp-satellite/models:
+    get:
+      x-request-examples-description-1: Get active and passive models information.
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/models
+      tags:
+        - GetAiModels
+      description: Get active and passive models information.
+      operationId: GetAiModels
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      produces:
+        - application/json
+      parameters:
+        - name: X-Auth-Token
+          in: header
+          required: true
+          type: string
+          description: IAM token information, which is used for tenant authentication. The value of this parameter can be obtained from the token request API of IAM.
+        - name: status
+          in: query
+          type: string
+          description: status of model
+      responses:
+        '200':
+          description: The request is successful
+          schema:
+            items:
+              $ref: '#/definitions/AiModelDto'
+            type: array
+          examples:
+            application/json:
+              - code: "code"
+                status: 2
+                name: "aimodelName"
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: An internal service error occurs.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+      x-order: 2
+  /v1/kmp-satellite/upload-results:
+    post:
+      x-request-examples-description-1: This request, called by the AI model,give the successful result to be prepared for preview.
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/upload-results
+      x-request-examples-body-formdata:
+        file: validgeo.zip
+        type: zip
+        task_id: 00e999ed859e4682b3a176d4347493fa
+      tags:
+        - AIService
+      description: AI model calls this API to give the successful result to be prepared for the preview
+      operationId: UploadResults
+      summary: Upload results of successful tasks
+      consumes:
+        - multipart/form-data
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      produces:
+        - application/json
+      parameters:
+        - name: file
+          in: formData
+          type: file
+          required: true
+          description: Result file to be uploaded or geojson to be imported
+        - in: query
+          name: type
+          type: string
+          required: true
+          description: type of sending file
+        - in: query
+          name: task_id
+          type: string
+          required: true
+          description: Generated task id
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            type: boolean
+          examples:
+            application/json: true
+        '400':
+          description: Error response
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+      x-order: 2
+  /v1/kmp-satellite/task_statistics:
+    get:
+      tags:
+      - Task-Operations
+      operationId: GetTasksStatistics
+      x-request-examples-description-1: This endpoint lists task statistics with grouped by status
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/task_statistics
+      description: Get task statistics with grouped by status
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+      - name: created_begin_datetime
+        in: query
+        description: Create begin time using to filter result according to create time Format UTC time yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+        required: false
+        type: string
+        format: date-time
+      - name: created_end_datetime
+        in: query
+        description: Create end time using to filter result according to create time.Format UTC time yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+        required: false
+        type: string
+        format: date-time
+      - name: status
+        in: query
+        description: Using to filter result according to task status, can be between 0 and 6
+        required: false
+        type: array
+        items:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 6
+      - name: user_file_name
+        in: query
+        description: Using to filter result according to uploaded file name
+        required: false
+        maxLength: 255
+        minLength: 1
+        type: string
+      - name: user_file_id
+        in: query
+        description: Using to filter result according to uploaded file id
+        required: false
+        maxLength: 32
+        minLength: 1
+        type: string
+      - name: model_code
+        in: query
+        description: Using to filter result according to model code
+        required: false
+        maxLength: 32
+        minLength: 1
+        type: string
+      - name: type
+        in: query
+        description: Using to filter result according to task type, type can be SR or MODEL
+        required: false
+        pattern: "/^(SR|MODEL)$/"
+        type: string
+      - name: X-Auth-Token
+        in: header
+        required: true
+        type: string
+        description: IAM token information, which is used for tenant authentication. The value of this parameter can be obtained from the token request API of IAM.
+      responses:
+        '200':
+          description: The request is successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TaskStatisticsRespDto'
+          examples:
+            application/json:
+              - status: null
+                count: 1
+              - status: 1
+                count: 43
+              - status: 2
+                count: 2
+              - status: 3
+                count: 31
+              - status: 5
+                count: 256
+              - status: 6
+                count: 6
+        '400':
+          description: Error response
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+        '500':
+          description: An internal service error occurs
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+  /v1/kmp-satellite/tasks:
+    get:
+      tags:
+      - Task-Operations
+      operationId: QueryTasks
+      x-request-examples-url-1: https://{endpoint}/v1/kmp-satellite/tasks?offset=0&limit=1
+      x-request-examples-description-1: This request lists tasks by conditions
+      description: Query task list by conditions
+      x-is-registered: 'Y'
+      x-support-sdk: 'Y'
+      x-opseverity: Info
+      x-apigateway-request-type: Public
+      security:
+        - apig-auth-iam: [ ]
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+      - name: created_begin_datetime
+        in: query
+        description: Create begin time using to filter result according to create time. Format UTC time yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+        required: false
+        type: string
+        format: date-time
+      - name: created_end_datetime
+        in: query
+        description: Create end time using to filter result according to create time. Format UTC time yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+        required: false
+        type: string
+        format: date-time
+      - name: status
+        in: query
+        description: Using to filter result according to task status, can be between 0 and 6
+        required: false
+        type: array
+        items:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 6
+      - name: user_file_name
+        in: query
+        description: Using to filter result according to uploaded file name
+        required: false
+        maxLength: 255
+        minLength: 1
+        type: string
+      - name: user_file_id
+        in: query
+        description: Using to filter result according to uploaded file id
+        required: false
+        maxLength: 32
+        minLength: 1
+        type: string
+      - name: model_code
+        in: query
+        description: Using to filter result according to model code
+        required: false
+        maxLength: 32
+        minLength: 1
+        type: string
+      - name: type
+        in: query
+        description: Using to filter result according to task type, type can be SR or MODEL
+        required: false
+        pattern: "/^(SR|MODEL)$/"
+        type: string
+      - name: offset
+        in: query
+        description: Current page
+        required: false
+        minimum: 0
+        type: integer
+        format: int32
+      - name: limit
+        in: query
+        description: Data count of per page
+        required: false
+        type: integer
+        format: int32
+      - name: X-Auth-Token
+        in: header
+        required: true
+        type: string
+        description: IAM token information, which is used for tenant authentication. The value of this parameter can be obtained from the token request API of IAM.
+      responses:
+        '200':
+          description: The request is successful.
+          schema:
+            "$ref": "#/definitions/PagedResultTaskAndFileResponseDto"
+          examples:
+            application/json:
+              data:
+                - file_id: 3d54fd1ed5534c67aa46f74f7c798f78
+                  file_name: "buildingTest.tif"
+                  file_obs_object_key: "ounwejsmlc-2281217041074782.tif"
+                  file_obs_url: "https://kmp-sat-interpret-cn-north-7.obs.cn-north-7.ulanqab.huawei.com:443/ounwejsmlc-2281217041074782.tif?AccessKeyId=ACR2WRQHYHPUEAJCZ6D0&Expires=1702963834&Signature=7NsTsHwCsN%2BDsYWrGdS%2BS2obDJA%3D"
+                  task_id: "94ef0b6cd2fa46869146684cdf0bfb6e"
+                  task_status: 5
+                  task_created_at: "2023-12-18T19:39:48"
+                  task_updated_at: "2023-12-18T19:39:50"
+                  type: "model"
+                  model_code: "car"
+                  model_name: "车辆"
+                  thumbnail_url: "https://kmp-sat-interpret-cn-north-7.obs.cn-north-7.ulanqab.huawei.com:443/Thumbnail/nrrmudtfzz-2281221914191344.jpg?AccessKeyId=ACR2WRQHYHPUEAJCZ6D0&Expires=1702963834&Signature=fNEeDA4HtZiWUFe3%2Ftv8vFDDwGo%3D"
+                  parameters: null
+              page:
+                offset: 0
+                limit: 1
+                total: 339
+        '400':
+          description: Invalid request.
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              type: string
+              description: Request ID, which is used by O&M personnel to locate request logs.
+              minLength: 32
+              maxLength: 32
+        '500':
+          description: An internal service error occurs
+          schema:
+            $ref: '#/definitions/ErrorMsg'
+          headers:
+            X-request-id:
+              description: Request ID, which is used by O&M personnel to locate request logs.
+              type: string
+              minLength: 32
+              maxLength: 32
+definitions:
+  ErrorMsg:
+    type: object
+    description: Error object returned upon failure
+    required:
+      - error_code
+      - error_msg
+    properties:
+      error_code:
+        description: Error code
+        type: string
+        minLength: 8
+        maxLength: 36
+      error_msg:
+        description: Error description
+        type: string
+        minLength: 2
+        maxLength: 512
+  SubmitErrorReq:
+    description: "Submit error request"
+    type: object
+    required:
+      - status
+      - task_id
+    properties:
+      task_id:
+        type: string
+        description: Task id
+        example: "1234abc"
+      status:
+        type: integer
+        format: int32
+        description: TaskStatusEnum integer value
+        example: 3
+      message:
+        type: string
+        description: Error message
+        example: "Task fail"
+  UploadFileResult:
+    type: object
+    description: Result of uploaded file
+    properties:
+      file_id:
+        description: Uploaded file id
+        type: string
+  DisplayImageInfoDto:
+    type: object
+    properties:
+      center:
+        description: The x and y coordinates of the center.
+        $ref: '#/definitions/ImageInfoCenterDto'
+      extent:
+        description: The min and max x-y coordinates of the center.
+        $ref: '#/definitions/ImageInfoExtentDto'
+  ImageInfoCenterDto:
+    type: object
+    properties:
+      x:
+        type: number
+        format: double
+      'y':
+        type: number
+        format: double
+  ImageInfoExtentDto:
+    type: object
+    properties:
+      min_x:
+        type: number
+        format: double
+      min_y:
+        type: number
+        format: double
+      max_x:
+        type: number
+        format: double
+      max_y:
+        type: number
+        format: double
+  ThumbnailGenerateRespDto:
+    type: object
+    properties:
+      obs_url:
+        type: string
+        description: obs_url of generated tiff file
+      message:
+        type: string
+        description: Information message that the request to produce a thumbnail has been received
+  DisplayResponseDto:
+    type: object
+    description: Display API response that encapsulates requested task features by bounds
+    properties:
+      tasks:
+        description: Task array
+        type: array
+        items:
+          description: Task items
+          $ref: '#/definitions/DisplayTaskResponseDto'
+  DisplayTaskResponseDto:
+    type: object
+    description: Displaying GeoJson Objects
+    properties:
+      task_id:
+        description: Task ID
+        type: string
+        minLength: 8
+        maxLength: 32
+      model:
+        description: Name of the model related to the task.
+        type: string
+        minLength: 2
+        maxLength: 256
+      centroid_x:
+        description: Center point of x coordinate
+        type: number
+        format: double
+      centroid_y:
+        description: Center point of y coordinate
+        type: number
+        format: double
+      features:
+        $ref: '#/definitions/GeoJSONRoot'
+        description: Root of the GeoJSON response object
+  GeoJSONRoot:
+    type: object
+    description: Root of the GeoJSON response object
+    properties:
+      type:
+        description: JSON object type.
+        type: string
+      crs:
+        description: coordinate reference system type
+        $ref: '#/definitions/GeoJSONCrs'
+      features:
+        description: Feature list
+        type: array
+        items:
+          $ref: '#/definitions/GeoJSONFeature'
+  GeoJSONCrs:
+    type: object
+    description: coordinate reference system used for features
+    properties:
+      type:
+        description: Coordinate reference system object type
+        type: string
+      properties:
+        description: Properties of coordinate reference system
+        $ref: '#/definitions/GeoJSONCrsProperties'
+  GeoJSONFeature:
+    type: object
+    description: Coordinates Item of GeoJson
+    properties:
+      type:
+        description: Type of object
+        type: string
+      id:
+        description: Feature string name
+        type: string
+      geometry:
+        description: GeoJSON Geometry object that contains coordinates
+        $ref: '#/definitions/GeoJSONGeometry'
+      properties:
+        description: Coordinate system properties object
+        $ref: '#/definitions/GeoJSONProperties'
+  GeoJSONCrsProperties:
+    type: object
+    description: Coordinate system properties object
+    properties:
+      name:
+        description: Coordinate system name
+        type: string
+  GeoJSONGeometry:
+    type: object
+    description: Geometry object of feature that contains coordinates
+    properties:
+      type:
+        description: Type of the Geometry object (point-polygon-multipolygon...)
+        type: string
+      coordinates:
+        description: Coordinate definitions by Geometry type
+        type: array
+        items:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: number
+                description: Coordinates of feature
+                format: double
+  GeoJSONProperties:
+    type: object
+    description: GeoJSON information other than coordinates
+    properties:
+      fid:
+        description: feature id
+        type: string
+  TaskRespDto:
+    type: object
+    description: Task list query response
+    properties:
+      full_frames:
+        description: Full frame task list of the image
+        type: array
+        items:
+          "$ref": "#/definitions/TaskDetailsRespDto"
+      selected_frames:
+        description: Task list of partial frames grouped by frame_name
+        type: object
+        additionalProperties:
+          type: array
+          items:
+            "$ref": "#/definitions/TaskDetailsRespDto"
+  TaskDetailsRespDto:
+    type: object
+    description: Task Details
+    properties:
+      id:
+        description: Task id
+        type: string
+      status:
+        description: Task status
+        type: integer
+        format: int32
+      model:
+        description: AI model type
+        type: string
+      type:
+        type: string
+        description: Task type
+      parameters:
+        type: array
+        items:
+          type: string
+        example: [ "sr" ]
+      created_at:
+        description: Task creation date
+        type: string
+        format: date-time
+      updated_at:
+        description: Task update date
+        type: string
+        format: date-time
+      uploaded_id:
+        description: Uploaded file reference
+        type: string
+      centroid_x:
+        description: Center point of x coordinate
+        type: number
+        format: double
+      centroid_y:
+        description: Center point of y coordinate
+        type: number
+        format: double
+      frame_name:
+        description: Frame name
+        type: string
+      coordinates:
+        description: Selected frame coorinates
+        "$ref": "#/definitions/CoordinatesDTo"
+      is_partial:
+        description: Is this task for partial frame
+        type: boolean
+  DownloadResp:
+    type: object
+    properties:
+      id:
+        type: string
+        description: File id
+      task_id:
+        type: string
+        description: Task id
+      obs_id:
+        type: string
+        description: Obs id
+      type:
+        type: string
+        description: File type
+      created_at:
+        type: string
+        format: date-time
+        description: Creation time
+      updated_at:
+        type: string
+        format: date-time
+        description: Last update time
+      obs_file_url:
+        type: string
+        description: Obs file url for download
+      obs_object_key:
+        type: string
+        description: Obs object key for download
+      size:
+        type: integer
+        format: int64
+        description: File size
+  GenerateRequestDto:
+    type: object
+    description: Start AI Model operation request
+    properties:
+      file_id:
+        description: The user's uploaded tif file
+        type: string
+      type:
+        description: Generation type
+        type: string
+        pattern: ^(sr|model)$
+        example: ["sr","model"]
+      models:
+        type: array
+        description: List of models
+        items:
+          type: string
+        example: ["building", "tree"]
+      parameters:
+        type: array
+        items:
+          type: string
+        example: [ "SR" ]
+    required:
+      - file_id
+  CoordinatesDTo:
+    required:
+      - x_max
+      - x_min
+      - y_max
+      - y_min
+    type: object
+    properties:
+      x_min:
+        description: Left coordinate of the polygon
+        type: number
+        format: double
+      y_min:
+        description: Bottom coordinate of the polygon
+        type: number
+        format: double
+      x_max:
+        description: Right coordinate of the polygon
+        type: number
+        format: double
+      y_max:
+        description: Top coordinate of the polygon
+        type: number
+        format: double
+  GenerateForFrameRequestDto:
+    required:
+      - coordinates
+      - file_id
+      - frame_name
+      - model
+    type: object
+    description: Generate Partial Frame From AI Model operation request
+    properties:
+      model:
+        description: AI model
+        type: string
+        example: tree
+      coordinates:
+        description: Selected frame coordinates
+        "$ref": "#/definitions/CoordinatesDTo"
+        example:
+          x_min: 12695148.678640252,
+          y_min: 2577589.2276071595,
+          x_max: 12696476.798303531,
+          y_max: 2578184.376868093
+      file_id:
+        description: "The user's uploaded tif file"
+        type: string
+        example: 03d2c695bd18431ca86c833c1372332b
+      frame_name:
+        description: "Frame name"
+        type: string
+        maxLength: 32
+        pattern: ^[\\w\\u4e00-\\u9fa5\\uf900-\\ufa2d]*$
+        example: sssssssssss
+      parameters:
+        type: array
+        items:
+          type: string
+        example: [ "sr" ]
+  TaskStatusDto:
+    type: object
+    description: Start AI Model operation response
+    properties:
+      task_id:
+        description: Started Model task id
+        type: string
+      status:
+        description: Task status
+        type: string
+        enum:
+          - TASK_CREATED
+          - GENERATING
+          - SUCCESS_AI_MODEL
+          - FAILED_AI_MODEL
+          - CONVERTING
+          - SUCCESS_CONVERT_GEOJSON
+          - FAILED_CONVERT_GEOJSON
+      model:
+        description: Task modeling type
+        type: string
+      type:
+        type: string
+        description: Task type
+      parameters:
+        type: array
+        items:
+          type: string
+        example: ["sr"]
+        description: Task parameter
+      is_partial:
+        description: Specifies whether the task is created for partial or full frame
+        type: boolean
+      created_at:
+        description: Task created datetime
+        type: string
+        format: date-time
+  UserFileDto:
+    type: object
+    description: Details of a user's file such as downloadable url and metadata of the file
+    properties:
+      id:
+        type: string
+        description: User file id
+      file_name:
+        type: string
+        description: File name
+      obs_id:
+        type: string
+        description: Obs id for file
+      obs_object_key:
+        type: string
+        description: Obs object key
+      obs_object_url:
+        type: string
+        description: Obs object url
+      created_at:
+        type: string
+        format: date-time
+        description: Creation time for file
+      updated_at:
+        type: string
+        format: date-time
+        description: Update time for file
+      thumbnail_url:
+        type: string
+        description: File thumbnail url
+      file_centroid_x:
+        description: Center point of x coordinate
+        type: number
+        format: double
+      file_centroid_y:
+        description: Center point of y coordinate
+        type: number
+        format: double
+      corners:
+        description: Selected frame coorinates
+        "$ref": "#/definitions/CoordinatesDTo"
+
+  AiModelDto:
+    type: object
+    description: Start AI Model information request
+    properties:
+      code:
+        description: Model code
+        type: string
+      status:
+        description: Model status
+        type: string
+      model:
+        description: Model name
+        type: string
+  DownloadUserFileDto:
+    type: object
+    properties:
+      id:
+        type: string
+        description: File id
+      file_name:
+        type: string
+        description: File name
+      file_url:
+        type: string
+        description: File url
+      obs_file_url:
+        type: string
+        description: File obs url for download
+      obs_object_key:
+        type: string
+        description: Obs object key for file
+      obs_bucket_name:
+        type: string
+        description: Obs bucket name for file
+      created_at:
+        type: string
+        format: date-time
+        description: File creation time
+  TaskStatisticsRespDto:
+    type: object
+    properties:
+      status:
+        type: integer
+        description: Task status
+        format: int32
+        example: 1
+      count:
+        type: integer
+        description: Count of task
+        format: int64
+        example: 5
+    description: Task statistics details
+
+  PagedResultTaskAndFileResponseDto:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          "$ref": "#/definitions/TaskAndFileResponseDto"
+      page:
+        "$ref": "#/definitions/KmpPage"
+  TaskAndFileResponseDto:
+    type: object
+    properties:
+      file_id:
+        type: string
+        description: File unique id
+      file_name:
+        type: string
+        description: File original name
+        example: map.tif
+      file_obs_object_key:
+        type: string
+        description: Obs object key
+        example: pbkyszngua-296776237915900.tif
+      file_obs_url:
+        type: string
+        description: OBS file url
+        example: https://obs.huaweicloud.com/bucket/file
+      task_id:
+        type: string
+        description: Unique id of the task
+        example: c370d152a0154f40b4ce7af6a76ea5c4
+      task_status:
+        type: integer
+        description: Current task status
+        format: int32
+        example: 1
+      task_created_at:
+        type: string
+        description: Task create time
+        format: date-time
+      task_updated_at:
+        type: string
+        description: Latest task update time
+        format: date-time
+      type:
+        type: string
+        description: File with related tasks
+        example: MODEL
+      model_code:
+        type: string
+        description: Executed model code
+        example: building
+      model_name:
+        type: string
+        description: Executed model name
+        example: Building
+      thumbnail_url:
+        type: string
+        description: OBS thumbnail url
+        example: https://obs.huaweicloud.com/bucket/file
+      parameters:
+        type: array
+        items:
+          type: string
+        example: ['SR']
+    description: File with related tasks
+  KmpPage:
+    type: object
+    properties:
+      offset:
+        type: integer
+        description: Current page
+        format: int32
+        example: 1
+      limit:
+        type: integer
+        description: Data count of per page
+        format: int32
+        example: 10
+      total:
+        type: integer
+        description: Total count of result
+        format: int64
+        example: 24
+    description: Paging information details
+  PagedResultUserFileDto:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/UserFileDto"
+      page:
+        $ref: "#/definitions/KmpPage"
+securityDefinitions:
+  apig-auth-app:
+    in: header
+    name: Authorization
+    type: apiKey
+    x-apigateway-auth-type: AppSigv1
+  apig-auth-app-optional:
+    in: header
+    name: Authorization
+    type: apiKey
+    x-apigateway-auth-opt:
+      access-auth-type: optional
+    x-apigateway-auth-type: AppSigv1
+  apig-auth-iam:
+    in: header
+    name: unused
+    type: apiKey
+    x-apigateway-auth-type: IAM
+  apig-auth-iam-none:
+    in: header
+    name: unused
+    type: apiKey
+    x-apigateway-auth-type: IAM_NONE
